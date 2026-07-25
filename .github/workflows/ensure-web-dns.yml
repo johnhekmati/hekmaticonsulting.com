@@ -1,0 +1,71 @@
+name: Ensure web DNS (CNAME → Pages)
+
+# Idempotent: create proxied apex + www CNAMEs pointing at the Pages project.
+# Needs API token with Zone · DNS · Edit (and Zone · Zone · Read to resolve zone id).
+
+on:
+  workflow_dispatch:
+
+jobs:
+  dns:
+    runs-on: ubuntu-latest
+    name: Ensure hekmaticonsulting.com web CNAMEs
+    steps:
+      - name: Upsert CNAMEs
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          set -euo pipefail
+          TOKEN="${CLOUDFLARE_API_TOKEN}"
+          ZONE_NAME="hekmaticonsulting.com"
+          TARGET="hekmati-consulting-group.pages.dev"
+          API="https://api.cloudflare.com/client/v4"
+
+          auth=(-H "Authorization: Bearer ${TOKEN}" -H "Content-Type: application/json")
+
+          echo "::group::Resolve zone"
+          zone_json=$(curl -sS "${API}/zones?name=${ZONE_NAME}" "${auth[@]}")
+          echo "$zone_json" | jq '{success, result: [.result[]? | {id, name, status}]}'
+          ZONE_ID=$(echo "$zone_json" | jq -r '.result[0].id // empty')
+          if [ -z "$ZONE_ID" ] || [ "$ZONE_ID" = "null" ]; then
+            echo "Zone not found or token lacks Zone Read. Response above."
+            exit 1
+          fi
+          echo "ZONE_ID=${ZONE_ID}"
+          echo "::endgroup::"
+
+          upsert() {
+            local name="$1"
+            local fqdn
+            if [ "$name" = "@" ]; then fqdn="$ZONE_NAME"; else fqdn="${name}.${ZONE_NAME}"; fi
+            echo "::group::Upsert CNAME ${fqdn} → ${TARGET}"
+            existing=$(curl -sS "${API}/zones/${ZONE_ID}/dns_records?type=CNAME&name=${fqdn}" "${auth[@]}")
+            rid=$(echo "$existing" | jq -r '.result[0].id // empty')
+            body=$(jq -nc --arg type CNAME --arg name "$name" --arg content "$TARGET" \
+              '{type:$type,name:$name,content:$content,proxied:true,ttl:1}')
+            if [ -n "$rid" ] && [ "$rid" != "null" ]; then
+              echo "Updating existing record id=${rid}"
+              resp=$(curl -sS -X PUT "${API}/zones/${ZONE_ID}/dns_records/${rid}" \
+                "${auth[@]}" --data "$body")
+            else
+              echo "Creating new record"
+              resp=$(curl -sS -X POST "${API}/zones/${ZONE_ID}/dns_records" \
+                "${auth[@]}" --data "$body")
+            fi
+            echo "$resp" | jq .
+            if ! echo "$resp" | jq -e '.success == true' >/dev/null; then
+              echo "Failed for ${fqdn}"
+              exit 1
+            fi
+            echo "OK: ${fqdn}"
+            echo "::endgroup::"
+          }
+
+          upsert "@"
+          upsert "www"
+
+          echo "::group::List relevant records"
+          curl -sS "${API}/zones/${ZONE_ID}/dns_records?per_page=100" "${auth[@]}" \
+            | jq '[.result[] | select(.type=="CNAME" or .type=="A" or .type=="AAAA") | {type,name,content,proxied}]'
+          echo "::endgroup::"
