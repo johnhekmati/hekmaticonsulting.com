@@ -296,16 +296,22 @@ a:hover {
   background:
     radial-gradient(ellipse 70% 55% at 50% 100%, rgba(196, 163, 90, 0.06), transparent 60%),
     var(--void);
+  text-align: center;
+}
+
+.section-context .intro {
+  margin-inline: auto;
 }
 
 .brief-frame {
-  margin: 0;
+  margin: 0 auto;
   max-width: 36rem;
   background: var(--navy);
   border: 1px solid var(--line);
   border-radius: 0.5rem;
   padding: 0.65rem;
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+  text-align: left; /* caption can stay left-aligned inside frame if preferred — override below */
 }
 
 .brief-video {
@@ -323,6 +329,7 @@ a:hover {
   font-size: 0.82rem;
   color: var(--muted);
   line-height: 1.45;
+  text-align: center;
 }
 
 
