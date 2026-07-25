@@ -29,7 +29,15 @@ Reuse the same account token that deploys TCF / johnhekmati (Pages Edit + Accoun
 
 1. Zone `hekmaticonsulting.com` on the **same** Cloudflare account as Pages.
 2. Run workflow **Attach Cloudflare custom domain** (or push that yml once).
-3. Wait cert **pending → active**. Apex uses CF CNAME flattening when attached via Pages.
+3. Ensure **DNS records** for apex + `www` (attach alone may leave zone SOA-only until CNAMEs exist).
+4. Wait cert **pending → active**. Apex uses CF CNAME flattening when attached via Pages.
+
+**DNS operator card (records + Proton placeholders):** [`DNS.md`](DNS.md)
+
+| Type | Name | Content | Proxy |
+|------|------|---------|-------|
+| CNAME | `@` | `hekmati-consulting-group.pages.dev` | Proxied |
+| CNAME | `www` | `hekmati-consulting-group.pages.dev` | Proxied |
 
 ## Day-to-day
 

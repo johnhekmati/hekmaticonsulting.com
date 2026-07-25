@@ -28,6 +28,7 @@ npm run preview
 
 ## Ops
 
-CF scaffold card: [`docs/CF_SCAFFOLD_TO_PROD.md`](docs/CF_SCAFFOLD_TO_PROD.md)
+- CF scaffold: [`docs/CF_SCAFFOLD_TO_PROD.md`](docs/CF_SCAFFOLD_TO_PROD.md)
+- DNS (web + Proton park): [`docs/DNS.md`](docs/DNS.md)
 
 Internal operator playbooks (`GROK.md`, `0x-*.html`) may live on disk beside this site; they are not required for Pages deploy of the public face.
