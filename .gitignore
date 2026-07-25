@@ -1,0 +1,15 @@
+.DS_Store
+Thumbs.db
+node_modules/
+.wrangler/
+*.log
+.dev.vars
+
+# Local preview noise
+.serve/
+
+# Operator playbooks stay on disk for Principal; not the public marketing surface
+GROK.md
+0[1-7]-*.html
+-1.cursorrules
+grok_image_*.jpg

@@ -1,0 +1,13 @@
+{
+  "name": "hekmaticonsulting-com",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Hekmati Consulting Group — hekmaticonsulting.com",
+  "scripts": {
+    "preview": "npx --yes serve . -p 5280",
+    "deploy": "wrangler pages deploy . --project-name=hekmati-consulting-group --branch=main --commit-dirty=true"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  }
+}

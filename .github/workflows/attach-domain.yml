@@ -1,0 +1,57 @@
+name: Attach Cloudflare custom domain
+
+# One-shot / re-runnable: bind apex (+ www) to Pages project hekmati-consulting-group.
+# Requires domain DNS in the same Cloudflare account (zone active).
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/attach-domain.yml"
+
+jobs:
+  attach:
+    runs-on: ubuntu-latest
+    name: Attach hekmaticonsulting.com
+    steps:
+      - name: Add custom domains to Pages project
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          set -euo pipefail
+          ACCOUNT_ID="${CLOUDFLARE_ACCOUNT_ID}"
+          TOKEN="${CLOUDFLARE_API_TOKEN}"
+          PROJECT="hekmati-consulting-group"
+          API="https://api.cloudflare.com/client/v4/accounts/${ACCOUNT_ID}/pages/projects/${PROJECT}/domains"
+
+          attach() {
+            local domain="$1"
+            echo "::group::Attach ${domain}"
+            code=$(curl -sS -o /tmp/cf-domain.json -w "%{http_code}" -X POST "${API}" \
+              -H "Authorization: Bearer ${TOKEN}" \
+              -H "Content-Type: application/json" \
+              --data "{\"name\":\"${domain}\"}")
+            cat /tmp/cf-domain.json
+            echo ""
+            if jq -e '.success == true' /tmp/cf-domain.json >/dev/null 2>&1; then
+              echo "OK: ${domain}"
+            elif jq -e '.errors[]?.message | test("already|exists|unique"; "i")' /tmp/cf-domain.json >/dev/null 2>&1; then
+              echo "Already attached: ${domain}"
+            else
+              echo "HTTP ${code} — response above"
+              if [ "${domain}" = "hekmaticonsulting.com" ]; then
+                exit 1
+              fi
+            fi
+            echo "::endgroup::"
+          }
+
+          attach "hekmaticonsulting.com"
+          attach "www.hekmaticonsulting.com"
+
+          echo "::group::List domains"
+          curl -sS "https://api.cloudflare.com/client/v4/accounts/${ACCOUNT_ID}/pages/projects/${PROJECT}/domains" \
+            -H "Authorization: Bearer ${TOKEN}" | jq .
+          echo "::endgroup::"
