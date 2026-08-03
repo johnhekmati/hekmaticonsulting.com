@@ -10,6 +10,7 @@ node_modules/
 
 # Operator playbooks stay on disk for Principal; not the public marketing surface
 GROK.md
+CLAUDE.md
 0[1-7]-*.html
 -1.cursorrules
 grok_image_*.jpg
