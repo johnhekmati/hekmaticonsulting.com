@@ -6,6 +6,16 @@ Public site (HCG). Newest first.
 
 ---
 
+## 2026-08-06 — MMM venture card · live-mail contact fix · hover polish
+
+- **Related work** gains a third card: Modern Method Marketing (in-house studio,
+  first-party only); ventures grid goes three-across at ≥980px.
+- **Contact**: removed the stale "if mail is unavailable during domain setup"
+  fallback — mail is live (SPF/DKIM/DMARC verified); replaced with a one-line
+  pointer to the johnhekmati.com hub.
+- Micro-polish: card hover lift + shadow, `:focus-visible` outlines,
+  reduced-motion guards.
+
 ## 2026-07-28 — Release hygiene baseline
 
 - Established this changelog as required ship surface (parity with other live LOBs)

@@ -467,3 +467,13 @@ a:hover {
 .footer a:hover {
   color: var(--gold);
 }
+
+
+/* 2026-08-06 micro-polish */
+.lob, .card { transition: border-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease; }
+.lob:hover, .card:hover { transform: translateY(-3px); box-shadow: 0 12px 30px rgba(0,0,0,0.35); }
+a:focus-visible, .btn:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; border-radius: 2px; }
+@media (prefers-reduced-motion: reduce) { .lob, .card { transition: none; } .lob:hover, .card:hover { transform: none; } }
+
+/* Three ventures now — let them sit as one row on wide screens */
+@media (min-width: 980px) { .lob-row { grid-template-columns: repeat(3, 1fr); } }
